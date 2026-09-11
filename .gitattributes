@@ -1,31 +1,61 @@
-# Normalize line endings in the repository to LF.
-#
-# Without this, Git for Windows' default `core.autocrlf=true` checks text files
-# out with CRLF. That is not cosmetic here: server/src/app.ts pins
-# INLINE_BOOTSTRAP_SHA, the SHA-256 of the inline theme bootstrap in
-# client/index.html, and serves it in the CSP `script-src` directive. A CRLF
-# checkout changes those bytes, so the hash no longer matches the script it is
-# meant to authorize — the browser blocks the bootstrap and dark-mode users get
-# the white flash that #682 fixed. csp-inline-bootstrap.test.ts catches it, but
-# only after a Windows clone already fails two tests out of the box.
-*               text=auto eol=lf
+# Canonical fleet .gitattributes — normalizes line endings to LF.
+# All text files use LF in the repo; editors convert on checkout as needed.
+* text=auto eol=lf
 
-# Binary assets must never be line-ending converted.
-*.png           binary
-*.jpg           binary
-*.jpeg          binary
-*.gif           binary
-*.ico           binary
-*.webp          binary
-*.woff          binary
-*.woff2         binary
-*.ttf           binary
-*.eot           binary
-*.pdf           binary
-*.zip           binary
-*.node          binary
-*.db            binary
+# Shell scripts must keep LF for git-bash and WSL compatibility.
+*.sh text eol=lf
+*.bash text eol=lf
 
-# Windows-only scripts are fine either way, but keep them LF for consistency
-# with the rest of the tree; PowerShell reads LF without complaint.
-*.ps1           text eol=lf
+# PowerShell scripts: LF is safe and avoids CRLF noise on cross-platform work.
+*.ps1 text eol=lf
+*.psm1 text eol=lf
+
+# Python: LF for consistent hashing and cross-platform behavior.
+*.py text eol=lf
+
+# Web/config files: LF standard.
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Binary files — never normalize.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.bmp binary
+*.svg binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.7z binary
+*.rar binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.bin binary
+*.dat binary
+*.db binary
+*.sqlite binary
+*.wav binary
+*.mp3 binary
+*.mp4 binary
+*.webm binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
