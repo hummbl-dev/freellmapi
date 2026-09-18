@@ -24,11 +24,11 @@ Language-specific index for English documentation.
 | [proxy/](proxy/OVERVIEW.md) | Outbound proxy transports: forward vs fetch-relay, system auto-detect. |
 | [testing/](testing/OVERVIEW.md) | Testing: local matrix, server suite, e2e compatibility suite. |
 | [troubleshooting/](troubleshooting/OVERVIEW.md) | Common issues: Docker, empty chain, fetch-relay, idempotency, quota, TRUST_PROXY. |
-| [i18n/](../TRANSLATION.md) | Translation workflow — see [Translating](../TRANSLATION.md) for the cross-lang guide (outside per-language tree). |
+| [i18n/](../policy/TRANSLATION.md) | Translation workflow — see [Translating](../policy/TRANSLATION.md) for the cross-lang guide (outside per-language tree). |
 
 ## Other entry points
 
 - [README.md](README.md) — English docs index (per-language).
 - [../../README.md](../../README.md) — Documentation index (global).
 
-See also: [简体中文 — Chinese](../zh-cn/OVERVIEW.md) · [Translating guide](../TRANSLATION.md)
+See also: [简体中文 — Chinese](../zh-cn/OVERVIEW.md) · [Translating guide](../policy/TRANSLATION.md)

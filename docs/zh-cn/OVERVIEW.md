@@ -2,7 +2,7 @@
 
 # 文档 —— 简体中文
 
-简体中文文档的语言级索引。每个文件都与 `docs/en/` 中同一位置的英文原文一一对应；术语遵循 [../TRANSLATION.md](../TRANSLATION.md) 中约定的中文术语表（提供方、词元、令牌……），与仪表盘界面保持一致。
+简体中文文档的语言级索引。每个文件都与 `docs/en/` 中同一位置的英文原文一一对应；术语遵循 [../TRANSLATION.md](../policy/TRANSLATION.md) 中约定的中文术语表（提供方、词元、令牌……），与仪表盘界面保持一致。
 
 ## 域
 
@@ -24,7 +24,7 @@
 | [proxy/](proxy/OVERVIEW.md) | [en/proxy/](proxy/OVERVIEW.md) | 出站代理传输：正向代理与 Fetch Relay、系统自动检测。 |
 | [testing/](testing/OVERVIEW.md) | [en/testing/](testing/OVERVIEW.md) | 测试：本地矩阵、服务端套件、端到端兼容性套件。 |
 | [troubleshooting/](troubleshooting/OVERVIEW.md) | [en/troubleshooting/](troubleshooting/OVERVIEW.md) | 常见问题：Docker、空链、Fetch Relay、幂等、额度、TRUST_PROXY。 |
-| [i18n](../TRANSLATION.md) | — | 翻译流程与术语表 —— 跨语言指南，位于语言目录之外。 |
+| [i18n](../policy/TRANSLATION.md) | — | 翻译流程与术语表 —— 跨语言指南，位于语言目录之外。 |
 
 ## 翻译状态
 
@@ -34,6 +34,6 @@
 
 - [README.md](README.md) —— 中文文档入口页。
 - [../../README.zh-cn.md](../../README.zh-cn.md) —— 项目总览（中文 README）。
-- [../OVERVIEW.md](../OVERVIEW.md) —— `docs/` 目录总索引。
+- [../architecture/OVERVIEW.md](../architecture/OVERVIEW.md) —— `docs/` 目录总索引。
 
-另见：[English](../en/OVERVIEW.md) · [翻译指南](../TRANSLATION.md)
+另见：[English](../en/OVERVIEW.md) · [翻译指南](../policy/TRANSLATION.md)

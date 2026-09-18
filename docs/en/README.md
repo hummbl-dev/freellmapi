@@ -24,7 +24,7 @@ This is the user entry point — start here to install the gateway, call the Ope
 
 ## Website assets in this directory
 
-- [`index.html`](../index.html) — project landing page.
-- [`install.sh`](../install.sh) — Unix Docker bootstrap script.
-- [`install.ps1`](../install.ps1) — PowerShell bootstrap script.
-- [`success.html`](../success.html) — post-install success page.
+- [`index.html`](../site/index.html) — project landing page.
+- [`install.sh`](../site/install.sh) — Unix Docker bootstrap script.
+- [`install.ps1`](../site/install.ps1) — PowerShell bootstrap script.
+- [`success.html`](../site/success.html) — post-install success page.
