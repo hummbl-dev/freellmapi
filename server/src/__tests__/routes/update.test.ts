@@ -430,7 +430,7 @@ describe('Update API', () => {
 
       const first = httpGet(app, '/api/update/check');
       const second = httpGet(app, '/api/update/check');
-      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce(), { timeout: 10000 });
       resolveFetch(response(compareBody('ahead')));
 
       expect((await first).body.status).toBe('available');

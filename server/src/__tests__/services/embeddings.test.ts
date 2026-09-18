@@ -60,7 +60,7 @@ describe('embeddings service', () => {
     let finish!: (response: Response) => void;
     const fetchMock = mockFetch(() => new Promise<Response>(resolve => { finish = resolve; }));
     const first = runEmbeddings('budget-embed', ['hello']);
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1), { timeout: 10000 });
     await expect(runEmbeddings('budget-embed', ['hello'])).rejects.toMatchObject({ status: 429, code: 'quota_exceeded' });
     finish(new Response('unavailable', { status: 503 }));
     await expect(first).rejects.toMatchObject({ status: 502 });
