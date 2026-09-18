@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
+import dns from 'node:dns';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import type { Express } from 'express';
 import { createApp } from '../../app.js';
 import { initDb, getDb } from '../../db/index.js';
@@ -61,6 +62,17 @@ describe('POST /api/keys/import-selected — custom endpoints (#687)', () => {
 
   beforeEach(() => {
     getDb().prepare('DELETE FROM api_keys').run();
+    // assessProviderUrl does a real DNS lookup per new endpoint; pin it so the
+    // suite doesn't wait on the resolver — a non-existent test host can take
+    // seconds to NXDOMAIN on a slow link. A public address yields the allowed
+    // verdict the relay.example.com cases expect; IP literals skip the lookup.
+    vi.spyOn(dns.promises, 'lookup').mockImplementation(async () => [
+      { address: '93.184.216.34', family: 4 },
+    ] as any);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('restores a custom endpoint when the row carries its base URL', async () => {
