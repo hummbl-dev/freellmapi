@@ -6,7 +6,9 @@ import type { GenerateContext } from './types.js';
 
 // CI runners export XDG_CONFIG_HOME (and could export MIMOCODE_HOME / DSH_HOME),
 // which the XDG-aware generators honour over ctx.homeDir. Pin them so golden
-// output is stable everywhere.
+// output is stable everywhere. Generators also build paths with path.join,
+// which emits the HOST separator — pin it to posix.join so the POSIX goldens
+// and assertions hold on Windows too (the generated content is identical).
 beforeEach(() => {
   vi.stubEnv('XDG_CONFIG_HOME', '');
   vi.stubEnv('MIMOCODE_HOME', '');
@@ -15,9 +17,11 @@ beforeEach(() => {
   vi.stubEnv('OPENCLAW_STATE_DIR', '');
   vi.stubEnv('OPENCLAW_CONFIG_PATH', '');
   vi.stubEnv('HERMES_HOME', '');
+  vi.spyOn(path, 'join').mockImplementation((...parts: string[]) => path.posix.join(...parts));
 });
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.restoreAllMocks();
 });
 
 const context: GenerateContext = {

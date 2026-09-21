@@ -52,6 +52,26 @@ describe('OpenAI multimodal array content', () => {
       label: 'array-content',
     });
     expect(addKey.status).toBe(201);
+
+    // The fake gsk_ key can never authenticate; answer upstream calls with an
+    // instant 401 so the fallback loop doesn't burn the 5s test timeout on
+    // real network round-trips. This also makes the file offline-safe —
+    // tests below that stub a 200 still override this implementation.
+    const origFetch = global.fetch;
+    vi.spyOn(global, 'fetch').mockImplementation(async (url, init) => {
+      const urlStr = typeof url === 'string' ? url : url.toString();
+      if (urlStr.includes('api.groq.com')) {
+        const errBody = JSON.stringify({ error: { message: 'Invalid API Key' } });
+        return {
+          ok: false,
+          status: 401,
+          json: () => Promise.resolve(JSON.parse(errBody)),
+          text: () => Promise.resolve(errBody),
+          headers: new Headers(),
+        } as any;
+      }
+      return origFetch(url, init);
+    });
   });
 
   afterEach(() => {
