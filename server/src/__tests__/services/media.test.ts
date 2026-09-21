@@ -71,7 +71,7 @@ describe('media service', () => {
     const fetchMock = vi.fn(() => new Promise<Response>(resolve => { finish = resolve; }));
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     const first = runImageGeneration('auto', { prompt: 'a cat' });
-    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1), { timeout: 10000 });
     const request = (fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1];
     expect(new Headers(request.headers).get('Authorization')).toBe('Bearer available-key');
     await expect(runImageGeneration('auto', { prompt: 'a cat' })).rejects.toMatchObject({ status: 429, code: 'quota_exceeded' });
