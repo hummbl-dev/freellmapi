@@ -228,7 +228,7 @@ FreeLLMAPI 在设计上是本地优先、单用户的。你的提供方密钥留
 
 翻译文件以扁平 JSON 的形式放在 [`client/src/i18n/locales/`](client/src/i18n/locales)。想修某个字符串，直接改对应语言 JSON 里的值即可。想加一门语言，复制 `en.json`、翻译其中的值，再到 `client/src/i18n/locale-config.ts` 注册这个语言（托盘文案还需要改 `desktop/src/i18n.ts`）；`npm test` 会检查每种语言的键和占位符是否对齐。欢迎提 PR。
 
-中文的术语约定见 [docs/TRANSLATION.md](docs/TRANSLATION.md)，提交翻译前请先过一遍，这样 README 和仪表盘里的说法能对得上。
+中文的术语约定见 [docs/policy/TRANSLATION.md](docs/policy/TRANSLATION.md)，提交翻译前请先过一遍，这样 README 和仪表盘里的说法能对得上。
 
 ## Premium 实时目录
 

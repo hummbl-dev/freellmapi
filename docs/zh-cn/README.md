@@ -23,11 +23,11 @@
 - [桌面应用](../../desktop/README.md) —— 构建和打包 Electron 应用。
 - [贡献者指南](../../CONTRIBUTING.md) —— 开发流程、测试要求和贡献政策。
 - [数据库迁移](../../server/src/db/README.md) —— 创建、应用、查看和回滚 schema 迁移。
-- [翻译指南](../TRANSLATION.md) —— 仪表盘字符串的规则，以及中文术语约定。
+- [翻译指南](../policy/TRANSLATION.md) —— 仪表盘字符串的规则，以及中文术语约定。
 
 ## docs 目录里的站点资源
 
-- [`index.html`](../index.html) —— 项目落地页。
-- [`install.sh`](../install.sh) —— Unix 下的 Docker 引导脚本。
-- [`install.ps1`](../install.ps1) —— PowerShell 引导脚本。
-- [`success.html`](../success.html) —— 安装成功页。
+- [`index.html`](../site/index.html) —— 项目落地页。
+- [`install.sh`](../site/install.sh) —— Unix 下的 Docker 引导脚本。
+- [`install.ps1`](../site/install.ps1) —— PowerShell 引导脚本。
+- [`success.html`](../site/success.html) —— 安装成功页。

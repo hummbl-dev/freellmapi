@@ -1,0 +1,9 @@
+{
+  "schema": "hummbl.docs-layout.v1",
+  "root_allow": [
+    "README.zh-cn.md"
+  ],
+  "exempt_dirs": [
+    "site"
+  ]
+}
