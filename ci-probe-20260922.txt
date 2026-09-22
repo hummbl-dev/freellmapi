@@ -1,0 +1,1 @@
+Throwaway CI dispatch probe (Actions outage triage, 2026-09-22). Safe to delete with branch ci/pi/dispatch-probe-20260922.
