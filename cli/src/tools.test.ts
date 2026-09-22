@@ -9,6 +9,15 @@ import type { GenerateContext } from './types.js';
 // output is stable everywhere. Generators also build paths with path.join,
 // which emits the HOST separator — pin it to posix.join so the POSIX goldens
 // and assertions hold on Windows too (the generated content is identical).
+//
+// Capture the pristine function BEFORE installing the spy below: on POSIX
+// platforms `path` IS `path.posix` (same object), so calling
+// `path.posix.join` from inside the mock resolves back to the mock itself and
+// recurses without bound — RangeError: Maximum call stack size exceeded for
+// every generator test on Linux/macOS, while Windows (where `path` is
+// `path.win32`) passes. Verified: 41/45 tests fail on Linux before this fix.
+const posixJoin = path.posix.join.bind(path.posix);
+
 beforeEach(() => {
   vi.stubEnv('XDG_CONFIG_HOME', '');
   vi.stubEnv('MIMOCODE_HOME', '');
@@ -17,7 +26,7 @@ beforeEach(() => {
   vi.stubEnv('OPENCLAW_STATE_DIR', '');
   vi.stubEnv('OPENCLAW_CONFIG_PATH', '');
   vi.stubEnv('HERMES_HOME', '');
-  vi.spyOn(path, 'join').mockImplementation((...parts: string[]) => path.posix.join(...parts));
+  vi.spyOn(path, 'join').mockImplementation((...parts: string[]) => posixJoin(...parts));
 });
 afterEach(() => {
   vi.unstubAllEnvs();
