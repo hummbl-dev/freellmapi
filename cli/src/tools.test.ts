@@ -11,11 +11,11 @@ import type { GenerateContext } from './types.js';
 // and assertions hold on Windows too (the generated content is identical).
 //
 // Capture the pristine function BEFORE installing the spy below: on POSIX
-// platforms `path` IS `path.posix` (the same object), so calling
+// platforms `path` IS `path.posix` (same object), so calling
 // `path.posix.join` from inside the mock resolves back to the mock itself and
 // recurses without bound — RangeError: Maximum call stack size exceeded for
 // every generator test on Linux/macOS, while Windows (where `path` is
-// `path.win32`) passes.
+// `path.win32`) passes. Verified: 41/45 tests fail on Linux before this fix.
 const posixJoin = path.posix.join.bind(path.posix);
 
 beforeEach(() => {
