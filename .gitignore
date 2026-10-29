@@ -24,3 +24,16 @@ update-hermes.sh
 
 # Monetization planning — private, never committed
 monetization/
+
+# HUMMBL fleet
+_internal/
+_between/
+_external/
+
+# fleet residue (maintenance-policy.json)
+.mimosa/
+.coverage
+_tmp*
+.pytest_tmp/
+*.bak
+__pycache__/

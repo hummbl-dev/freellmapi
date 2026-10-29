@@ -1,0 +1,123 @@
+name: Security Scan
+
+# Lightweight security workflow: gitleaks secret scan + dependency audit.
+# Pattern sourced from hummbl-production/gitleaks.yml and oss/dependency-review.yml.
+#
+# Runs on GitHub-hosted runners: this repository is public and registers no
+# self-hosted runners, so the fleet private-repo self-hosted policy does not
+# apply. A [self-hosted, Linux] label here matches no runner (the jobs queue
+# forever), and on a public repo it would let a fork PR -- whose merge commit
+# supplies this workflow definition -- execute code on a persistent host.
+# GitHub-hosted runners are ephemeral, which removes that exposure.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # Pushes get a per-commit group so a queued run is never replaced by a
+  # newer push — every main push range is scanned. PR runs still dedupe
+  # per-ref and cancel in progress.
+  group: ${{ github.workflow }}-${{ github.ref }}${{ github.event_name == 'push' && format('-{0}', github.sha) || '' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  gitleaks:
+    if: >-
+      ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
+    name: Gitleaks Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSL -o gitleaks.tar.gz https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/gitleaks-bin"
+          tar -xzf gitleaks.tar.gz -C "$RUNNER_TEMP/gitleaks-bin" gitleaks
+          echo "$RUNNER_TEMP/gitleaks-bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/gitleaks-bin/gitleaks" version
+
+      - name: Gitleaks scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          # Scan only what this change introduces. fetch-depth: 0 also pulls in
+          # the upstream history of this fork, which already carries 53 findings
+          # in tashfeenahmed/freellmapi test fixtures; failing on those would
+          # leave the gate permanently red over something no contributor to this
+          # fork can fix, which trains people to ignore it.
+          range=""
+          if [ -n "$BASE_SHA" ] && [ -n "$HEAD_SHA" ]; then
+            range="$BASE_SHA..$HEAD_SHA"
+          elif [ -n "$BEFORE_SHA" ] && [ "$BEFORE_SHA" != "0000000000000000000000000000000000000000" ] && [ -n "$AFTER_SHA" ]; then
+            range="$BEFORE_SHA..$AFTER_SHA"
+          fi
+          if [ -n "$range" ]; then
+            echo "Scanning commits in $range"
+            # -m --first-parent: plain `git log -p` emits no diff for merge
+            # commits, which would let a merge carry an unscanned secret.
+            gitleaks detect --verbose --redact --log-opts="$range -m --first-parent"
+          else
+            echo "No commit range available (manual run); scanning the working tree."
+            gitleaks detect --verbose --redact --no-git
+          fi
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Dependency Review needs the GitHub Dependency graph, which is not settable
+    # on this fork -- PATCH security_and_analysis leaves dependency_graph unset
+    # and the action refuses to run, so this gate could never report. npm audit
+    # gives the same signal with no such prerequisite.
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: npm audit (production dependencies)
+        # Non-blocking on purpose: the resolved tree already carries 22
+        # vulnerabilities including 1 critical in production dependencies
+        # (2026-10-29), so a hard failure would block every unrelated change on
+        # a pre-existing baseline. The findings go to the step summary instead
+        # of a red X, so the signal stays visible without crying wolf. Make this
+        # fail on severity once that baseline is cleared.
+        run: |
+          npm audit --omit=dev 2>&1 | tee audit.txt || true
+          {
+            echo '## npm audit --omit=dev'
+            echo '```'
+            cat audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: npm audit (desktop workspace)
+        # desktop/ has its own lockfile outside the root workspaces, and its
+        # dev dependencies include Electron — which ships — so audit the full
+        # tree, not --omit=dev. Same non-blocking rationale as the root audit.
+        run: |
+          npm --prefix desktop audit 2>&1 | tee audit-desktop.txt || true
+          {
+            echo '## npm audit (desktop, full tree)'
+            echo '```'
+            cat audit-desktop.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
