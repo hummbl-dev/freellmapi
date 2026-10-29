@@ -88,9 +88,18 @@ jobs:
     # attacker-controlled code — the fork head is fetched as bare git
     # objects and only its diff text is scanned. No checkout, no execution
     # of PR content, contents:read only.
+    #
+    # Also runs under plain pull_request as the fallback path: GitHub can
+    # hold or skip pull_request_target for fork PRs (approval-required
+    # settings), and an uncovered fork diff is exactly what this gate
+    # exists to catch. pull_request runs with no secrets and a read-only
+    # token regardless of fork provenance, so scanning fetched diff text
+    # there is safe by construction. When both events fire for the same
+    # fork PR the job runs twice — deliberate redundancy for a security
+    # gate, and the two runs land in different concurrency groups.
     if: >-
-      github.event_name == 'pull_request_target' &&
-      github.event.pull_request.head.repo.full_name != github.repository
+      github.event.pull_request.head.repo.full_name != github.repository &&
+      (github.event_name == 'pull_request_target' || github.event_name == 'pull_request')
     name: Gitleaks Secret Scan (fork PR)
     runs-on: ubuntu-latest
     timeout-minutes: 5
