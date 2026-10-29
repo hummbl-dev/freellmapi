@@ -1,5 +1,12 @@
 # Canonical fleet .gitattributes — normalizes line endings to LF.
 # All text files use LF in the repo; editors convert on checkout as needed.
+#
+# The LF normalization is load-bearing, not cosmetic: server/src/app.ts pins
+# INLINE_BOOTSTRAP_SHA, the SHA-256 of the inline theme bootstrap in
+# client/index.html, and serves it in the CSP script-src directive. A CRLF
+# checkout changes those bytes, the hash stops matching, the browser blocks the
+# bootstrap and dark-mode users get the white flash fixed in #682.
+# csp-inline-bootstrap.test.ts catches it, but only after a Windows clone fails.
 * text=auto eol=lf
 
 # Shell scripts must keep LF for git-bash and WSL compatibility.
@@ -34,6 +41,8 @@
 *.jpeg binary
 *.gif binary
 *.ico binary
+*.webp binary
+*.node binary
 *.bmp binary
 *.svg binary
 *.pdf binary

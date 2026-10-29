@@ -2,7 +2,13 @@ name: Security Scan
 
 # Lightweight security workflow: gitleaks secret scan + dependency review.
 # Pattern sourced from hummbl-production/gitleaks.yml and oss/dependency-review.yml.
-# Runs on self-hosted Linux per fleet private-repo policy.
+#
+# Runs on GitHub-hosted runners: this repository is public and registers no
+# self-hosted runners, so the fleet private-repo self-hosted policy does not
+# apply. A [self-hosted, Linux] label here matches no runner (the jobs queue
+# forever), and on a public repo it would let a fork PR -- whose merge commit
+# supplies this workflow definition -- execute code on a persistent host.
+# GitHub-hosted runners are ephemeral, which removes that exposure.
 
 on:
   push:
@@ -24,7 +30,7 @@ jobs:
       ((github.event_name != 'pull_request' && github.event_name != 'pull_request_target') || github.event.pull_request.head.repo.full_name == github.repository) &&
       (github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'))
     name: Gitleaks Secret Scan
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -47,19 +53,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Clean self-hosted workspace
-        if: always()
-        working-directory: ${{ github.workspace }}
-        shell: bash
-        run: |
-          if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-            git reset --hard HEAD
-            git clean -ffdx
-          fi
-
   dependency-review:
     name: Dependency Review
-    runs-on: [self-hosted, Linux]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     if: github.event_name == 'pull_request'
     steps:
