@@ -17,7 +17,10 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Pushes get a per-commit group so a queued run is never replaced by a
+  # newer push — every main push range is scanned. PR runs still dedupe
+  # per-ref and cancel in progress.
+  group: ${{ github.workflow }}-${{ github.ref }}${{ github.event_name == 'push' && format('-{0}', github.sha) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
@@ -69,7 +72,9 @@ jobs:
           fi
           if [ -n "$range" ]; then
             echo "Scanning commits in $range"
-            gitleaks detect --verbose --redact --log-opts="$range"
+            # -m --first-parent: plain `git log -p` emits no diff for merge
+            # commits, which would let a merge carry an unscanned secret.
+            gitleaks detect --verbose --redact --log-opts="$range -m --first-parent"
           else
             echo "No commit range available (manual run); scanning the working tree."
             gitleaks detect --verbose --redact --no-git
@@ -101,5 +106,18 @@ jobs:
             echo '## npm audit --omit=dev'
             echo '```'
             cat audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: npm audit (desktop workspace)
+        # desktop/ has its own lockfile outside the root workspaces, and its
+        # dev dependencies include Electron — which ships — so audit the full
+        # tree, not --omit=dev. Same non-blocking rationale as the root audit.
+        run: |
+          npm --prefix desktop audit 2>&1 | tee audit-desktop.txt || true
+          {
+            echo '## npm audit (desktop, full tree)'
+            echo '```'
+            cat audit-desktop.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

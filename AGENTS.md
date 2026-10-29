@@ -2,24 +2,29 @@
 
 ## Project
 
-**freellmapi** â€” <!-- TODO: describe this repository -->
+**freellmapi** â€” aggregates free-tier LLM providers into one OpenAI-compatible
+endpoint (server, client, cli, and a desktop app). npm-workspaces monorepo.
 
 ## Scope
 
-- In scope: <!-- describe what this repo does -->
-- Out of scope: <!-- describe what belongs elsewhere -->
+- In scope: `shared/`, `server/`, `client/`, `cli/` workspaces; `desktop/` (own
+  lockfile, outside workspaces); provider adapters and the OpenAI-compatible API
+- Out of scope: upstream provider implementations, hosted deployment config
 
 ## Setup
 
 ```bash
 # Clone and enter
-git clone https://github.com/hummbl-io/freellmapi.git
+git clone https://github.com/hummbl-dev/freellmapi.git
 cd freellmapi
+npm install
 ```
 
 ## Testing
 
-<!-- Add test commands here, or remove this section if no tests -->
+```bash
+npm test   # bootstrap + hooks node --test, then per-workspace tests
+```
 
 ### Python baseline (gap-8 fleet-wide standard)
 
@@ -54,4 +59,8 @@ Before creating a PR branch, always:
 
 ## CI
 
-<!-- Describe CI workflows if any, or remove this section -->
+- `CI` (`.github/workflows/ci.yml`): build/test on push to `main` and PRs
+- `Docker` (`.github/workflows/docker.yml`): image build
+- `Security Scan` (`.github/workflows/security-scan.yml`): Gitleaks on the
+  pushed/PR commit range plus `npm audit` reports (root `--omit=dev`, and the
+  `desktop/` lockfile in full)
