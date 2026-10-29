@@ -83,17 +83,23 @@ jobs:
     # on this fork -- PATCH security_and_analysis leaves dependency_graph unset
     # and the action refuses to run, so this gate could never report. npm audit
     # gives the same signal with no such prerequisite.
-    #
-    # Non-blocking on purpose: the resolved tree already carries 22
-    # vulnerabilities including 1 critical in production dependencies
-    # (npm audit --omit=dev, 2026-10-29). Blocking here would fail every
-    # unrelated change on a pre-existing baseline. Flip to blocking once that
-    # baseline is cleared.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
 
       - name: npm audit (production dependencies)
-        run: npm audit --omit=dev
+        # Non-blocking on purpose: the resolved tree already carries 22
+        # vulnerabilities including 1 critical in production dependencies
+        # (2026-10-29), so a hard failure would block every unrelated change on
+        # a pre-existing baseline. The findings go to the step summary instead
+        # of a red X, so the signal stays visible without crying wolf. Make this
+        # fail on severity once that baseline is cleared.
+        run: |
+          npm audit --omit=dev > audit.txt 2>&1 || true
+          {
+            echo '## npm audit --omit=dev'
+            echo '```'
+            head -60 audit.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
