@@ -97,10 +97,17 @@ jobs:
     # there is safe by construction. When both events fire for the same
     # fork PR the job runs twice — deliberate redundancy for a security
     # gate, and the two runs land in different concurrency groups.
+    #
+    # The check name carries the event so the two runs stay distinguishable:
+    # under pull_request this file comes from the merge commit, which the
+    # fork author controls, so that run cannot prove anything — only the
+    # pull_request_target result (base-context workflow) is the scan of
+    # record. A single shared name would let the fork-editable run produce
+    # a green check indistinguishable from the trusted one.
     if: >-
       github.event.pull_request.head.repo.full_name != github.repository &&
       (github.event_name == 'pull_request_target' || github.event_name == 'pull_request')
-    name: Gitleaks Secret Scan (fork PR)
+    name: Gitleaks Secret Scan (fork PR, ${{ github.event_name }})
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
