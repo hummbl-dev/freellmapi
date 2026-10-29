@@ -96,10 +96,10 @@ jobs:
         # of a red X, so the signal stays visible without crying wolf. Make this
         # fail on severity once that baseline is cleared.
         run: |
-          npm audit --omit=dev > audit.txt 2>&1 || true
+          npm audit --omit=dev 2>&1 | tee audit.txt || true
           {
             echo '## npm audit --omit=dev'
             echo '```'
-            head -60 audit.txt
+            cat audit.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
